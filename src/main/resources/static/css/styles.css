@@ -1,0 +1,11 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+input:focus {
+    border-color: #007bff;
+}
+
+button {
+    font-weight: 500;
+}
