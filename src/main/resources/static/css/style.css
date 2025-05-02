@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'NotoSans';
+    src: url('/fonts/NotoSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 :root {
     /* Palette de couleurs ERPNext officielle */
     --blue-50: #f4f9ff;
@@ -31,7 +38,7 @@
 
 body {
     background-color: var(--gray-50);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-family: 'NotoSans', sans-serif;
     overflow-x: hidden;
     color: var(--text-color);
     font-size: 0.875rem;
@@ -138,4 +145,137 @@ body {
     .sidebar.offcanvas {
         z-index: 1050;
     }
+}
+
+/* TABLEAU -------------------------------------------------------------------------------------------------------- */
+/* Page header styling */
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.page-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ERPNext List View styling */
+.frappe-list {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Table styling */
+.frappe-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.list-row-head {
+    background-color: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.list-row-head th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.list-row {
+    border-bottom: 1px solid var(--gray-200);
+    transition: background-color 0.2s;
+}
+
+.list-row:hover {
+    background-color: var(--blue-50);
+}
+
+.list-row:last-child {
+    border-bottom: none;
+}
+
+.list-row td {
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.checkbox-col {
+    width: 40px;
+}
+
+.actions-col {
+    width: 120px;
+    text-align: right;
+}
+
+/* ERPNext Indicators */
+.indicator-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px; /* pill shape */
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.indicator-pill.blue {
+    background-color: #e8f3ff; 
+    color: #1a73e8; 
+}
+
+.indicator-pill.red {
+    background-color: #ffeaea;
+    color: #e53935;
+}
+
+/* Remove the dot circle */
+.indicator-pill::before {
+    display: none;
+}
+
+
+/* Action buttons */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-link {
+    color: var(--blue-600);
+    text-decoration: none;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.btn-link:hover {
+    color: var(--blue-800);
+    text-decoration: underline;
+}
+
+
+/* No results message */
+.no-result {
+    text-align: center;
 }
