@@ -20,13 +20,20 @@
     <!-- Main content -->
     <div class="main-content">
         <div class="container-fluid mt-4">
+
+            
             <div class="page-head">
                 <h1 class="page-title">Quotation Details: <em><span th:text="${quotation.name}"></span></em></h1>
             </div>
-
+            
             <!-- Error message -->
             <div th:if="${error}" class="alert alert-danger" role="alert">
                 <span th:text="${error}"></span>
+            </div>
+            
+            <!-- Afficher les messages de succès -->
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <span th:text="${success}"></span>
             </div>
 
             <!-- Quotation Details -->

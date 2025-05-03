@@ -153,17 +153,43 @@ public class SupplierController {
             logger.error("No ERPNext session found (sid is null)");
             return "redirect:/suppliers";
         }
-    
+
         String name = formData.getName();
         List<QuotationUpdateDTO.ItemUpdateDTO> items = formData.getItems();
-    
-        // Validation
+
+        // Validation des données de base
         if (name == null || items == null) {
             model.addAttribute("error", "Invalid input data.");
             logger.error("Invalid input data: name={}, items={}", name, items);
             return "redirect:/quotation-details/" + URLEncoder.encode(name != null ? name : "", StandardCharsets.UTF_8);
         }
-    
+
+        // Vérifier le statut de la quotation
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", sid);
+        HttpEntity<Void> statusRequest = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            String statusUrl = erpNextApiUrl + "/api/resource/Supplier Quotation/" + URLEncoder.encode(name, StandardCharsets.UTF_8) + "?fields=[\"status\",\"docstatus\"]";
+            ResponseEntity<Map> statusResponse = restTemplate.exchange(statusUrl, HttpMethod.GET, statusRequest, Map.class);
+            Map<String, Object> quotationStatus = (Map<String, Object>) statusResponse.getBody().get("data");
+            Integer docstatus = (Integer) quotationStatus.get("docstatus");
+            String status = (String) quotationStatus.get("status");
+
+            if (docstatus != null && docstatus == 1) {
+                redirectAttributes.addFlashAttribute("error", "Cannot update a submitted quotation.");
+                logger.error("Quotation {} is submitted (docstatus=1, status={})", name, status);
+                return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            logger.error("Error checking quotation status: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error checking quotation status: " + e.getMessage());
+            return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8);
+        }
+
+        // Log des données reçues
+        logger.info("Received form data: name={}, items={}", name, items);
+
         // Construire la payload pour l'API
         List<Map<String, Object>> updatedItems = new ArrayList<>();
         for (QuotationUpdateDTO.ItemUpdateDTO item : items) {
@@ -178,16 +204,20 @@ public class SupplierController {
             String baseRate = item.getBaseRate();
             String baseAmount = item.getBaseAmount();
             String warehouse = item.getWarehouse();
-    
+
+            // Log des données de l'item
+            logger.info("Item data: name={}, itemName={}, itemCode={}, rate={}, qty={}, stockUom={}, uom={}, conversionFactor={}, baseRate={}, baseAmount={}, warehouse={}",
+                    itemName, itemNameField, itemCode, rate, qty, stockUom, uom, conversionFactor, baseRate, baseAmount, warehouse);
+
             if (itemName == null || rate == null || itemCode == null || itemNameField == null || qty == null ||
                     stockUom == null || uom == null || conversionFactor == null ||
                     baseRate == null || baseAmount == null || warehouse == null || !rate.matches("\\d+(\\.\\d{1,2})?")) {
-                model.addAttribute("error", "Invalid data for item: " + itemName);
+                redirectAttributes.addFlashAttribute("error", "Invalid data for item: " + itemName);
                 logger.error("Invalid data for item: itemName={}, rate={}, itemCode={}, itemNameField={}, qty={}, stockUom={}, uom={}, conversionFactor={}, baseRate={}, baseAmount={}, warehouse={}",
                         itemName, rate, itemCode, itemNameField, qty, stockUom, uom, conversionFactor, baseRate, baseAmount, warehouse);
                 return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8);
             }
-    
+
             Map<String, Object> updatedItem = new HashMap<>();
             updatedItem.put("name", itemName);
             updatedItem.put("item_code", itemCode);
@@ -202,19 +232,15 @@ public class SupplierController {
             updatedItem.put("warehouse", warehouse);
             updatedItems.add(updatedItem);
         }
-    
+
         // Créer le payload pour l'API
         Map<String, Object> payload = new HashMap<>();
         payload.put("items", updatedItems);
         logger.info("Payload sent to ERPNext: {}", payload);
-    
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cookie", sid);
+
         headers.add("Content-Type", "application/json");
-    
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-        RestTemplate restTemplate = new RestTemplate();
-    
+
         try {
             String updateUrl = erpNextApiUrl + "/api/resource/Supplier Quotation/" + URLEncoder.encode(name, StandardCharsets.UTF_8);
             logger.info("Sending PUT request to: {}", updateUrl);
@@ -223,14 +249,14 @@ public class SupplierController {
             redirectAttributes.addFlashAttribute("success", "Quotation updated successfully.");
         } catch (HttpClientErrorException e) {
             logger.error("HTTP Error: {} - Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            model.addAttribute("error", "Error updating quotation: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error updating quotation: " + e.getMessage());
             return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8);
         } catch (Exception e) {
             logger.error("Unexpected error: {}", e.getMessage(), e);
-            model.addAttribute("error", "Error updating quotation: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error updating quotation: " + e.getMessage());
             return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8);
         }
-    
+
         return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8) + "?t=" + System.currentTimeMillis();
     }
 
