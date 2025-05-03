@@ -308,3 +308,10 @@ body {
     margin-top: 20px;
     margin-left: 10px;
 }
+
+.frappe-card { 
+    border: 1px solid #e5e5e5; 
+    border-radius: 6px; 
+    padding: 20px; 
+    background: #fff;
+}
