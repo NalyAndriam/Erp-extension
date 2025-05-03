@@ -76,6 +76,8 @@ public class SupplierController {
         return "pages/suppliers";
     }
 
+    // -------------------------------QUOTATIONS // DEMANDES DE DEVIS --------------------------------------------------------------
+
     @GetMapping("/quotations/{id}")
     public String showQuotationRequests(@PathVariable String id, Model model) {
         model.addAttribute("username", SecurityContextHolder.getContext().getAuthentication().getName());
@@ -258,6 +260,47 @@ public class SupplierController {
         }
 
         return "redirect:/quotation-details/" + URLEncoder.encode(name, StandardCharsets.UTF_8) + "?t=" + System.currentTimeMillis();
+    }
+
+
+    // -------------------------------PURCHASE ORDERS - LISTE COMMANDES --------------------------------------------------------------
+
+    @GetMapping("/purchase-orders/{id}")
+    public String showPurchaseOrders(@PathVariable String id, Model model) {
+        model.addAttribute("username", SecurityContextHolder.getContext().getAuthentication().getName());
+        model.addAttribute("activeMenu", "suppliers");
+        model.addAttribute("supplierName", id);
+
+        String sid = (String) session.getAttribute("erp_sid");
+        if (sid == null) {
+            model.addAttribute("error", "ERPNext session not found. Please reconnect.");
+            return "pages/purchase-orders";
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", sid);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            String fields = "[\"*\"]";
+            String filters = "[[\"supplier\", \"=\", \"" + id + "\"]]";
+            String purchaseOrdersUrl = erpNextApiUrl + "/api/resource/Purchase Order?fields=" + fields + "&filters=" + filters;
+
+            logger.info("Appel API : {}", purchaseOrdersUrl);
+
+            ResponseEntity<Map> purchaseOrdersResponse = restTemplate.exchange(purchaseOrdersUrl, HttpMethod.GET, request, Map.class);
+            List<Map<String, Object>> purchaseOrders = (List<Map<String, Object>>) purchaseOrdersResponse.getBody().get("data");
+            model.addAttribute("purchaseOrders", purchaseOrders);
+        } catch (HttpClientErrorException e) {
+            logger.error("Erreur HTTP : {} - Réponse : {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Erreur lors de la récupération des commandes : " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erreur inattendue : {}", e.getMessage());
+            model.addAttribute("error", "Erreur lors de la récupération des commandes : " + e.getMessage());
+        }
+
+        return "pages/purchase-orders";
     }
 
 
