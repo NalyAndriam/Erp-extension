@@ -37,33 +37,16 @@
                     </ul>
                 </li> -->
                 
-                <!-- Achats
-                <li class="dropdown">
-                    <a href="#" class="sidebar-item dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fas fa-shopping-cart sidebar-icon"></i>
-                        <span>Achats</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Demandes</a></li>
-                        <li><a class="dropdown-item" href="#">Bons de commande</a></li>
-                        <li>
-                            <a th:href="@{/suppliers}" th:class="${activeMenu == 'suppliers' ? 'dropdown-item active' : 'dropdown-item'}">
-                                Fournisseurs
-                            </a>
-                        </li>
-                    </ul>
-                </li> -->
-                
                 <li>
-                    <a th:href="@{/suppliers}" class="sidebar-item">
+                    <a th:href="@{/suppliers}" th:class="${activeMenu == 'suppliers' ? 'sidebar-item active' : 'sidebar-item'}">
                         <i class="fas fa-truck sidebar-icon"></i>
                         <span>Suppliers</span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="#" class="sidebar-item">
-                        <i class="fas fa-chart-bar sidebar-icon"></i>
+                    <a th:href="@{/purchase-invoices}" th:class="${activeMenu == 'invoices' ? 'sidebar-item active' : 'sidebar-item'}">
+                        <i class="fas fa-file-invoice me-2"></i>
                         <span>Accounting mode</span>
                     </a>
                 </li>
