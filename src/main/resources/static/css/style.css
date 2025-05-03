@@ -182,6 +182,15 @@ body {
     border-collapse: collapse;
 }
 
+.frappe-table .amount-col {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.frappe-table .date-col {
+    white-space: nowrap;
+}
+
 .list-row-head {
     background-color: var(--gray-50);
     border-bottom: 1px solid var(--gray-200);
@@ -247,6 +256,21 @@ body {
     color: #e53935;
 }
 
+.indicator-pill.orange {
+    background-color: #fff3e0;
+    color: #f28c38;
+}
+
+.indicator-pill.green {
+    background-color: #e6f4ea;
+    color: #2e7d32;
+}
+
+.indicator-pill.gray {
+    background-color: var(--gray-200);
+    color: var(--gray-700);
+}
+
 /* Remove the dot circle */
 .indicator-pill::before {
     display: none;
@@ -278,4 +302,9 @@ body {
 /* No results message */
 .no-result {
     text-align: center;
+}
+
+.backButton {
+    margin-top: 20px;
+    margin-left: 10px;
 }
