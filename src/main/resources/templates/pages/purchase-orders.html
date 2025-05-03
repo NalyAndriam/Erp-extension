@@ -54,7 +54,7 @@
                                 </span>
                             </td>
                             <td th:text="${purchaseOrder.transaction_date}"></td>
-                            <td th:text="${purchaseOrder.grand_total}"></td>
+                            <td th:text="${#numbers.formatDecimal(purchaseOrder.grand_total, 0, 'COMMA', 2, 'POINT')}"></td>
                             <td th:text="${purchaseOrder.name}"></td>
                             <!-- <td class="actions-col">
                                 <div class="actions">
