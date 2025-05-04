@@ -61,9 +61,16 @@
                             <td th:text="${invoice.name}"></td>
                             <td class="actions-col">
                                 <div class="actions">
-                                    <a th:href="@{/purchase-invoice-details/{id}(id=${invoice.name})}" class="btn btn-sm btn-link">
-                                        View Details
-                                    </a>
+                                    <th:block th:if="${invoice.status != 'Paid' && invoice.status != 'Cancelled'}">
+                                        <a th:href="@{/create-payment/{id}(id=${invoice.name})}" 
+                                           class="btn btn-sm btn-link"
+                                           onclick="createPayment('${invoice.name}')">
+                                            Create Payment
+                                        </a>
+                                    </th:block>
+                                    <th:block th:unless="${invoice.status != 'Paid' && invoice.status != 'Cancelled'}">
+                                        <span class="btn btn-sm btn-link disabled">Payment unavailable</span>
+                                    </th:block>
                                 </div>
                             </td>
                         </tr>
