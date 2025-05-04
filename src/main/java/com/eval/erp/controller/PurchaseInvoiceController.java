@@ -107,7 +107,8 @@ public class PurchaseInvoiceController {
             ResponseEntity<Map> invoiceResponse = restTemplate.exchange(invoiceUrl, HttpMethod.GET, request, Map.class);
             Map<String, Object> invoiceData = (Map<String, Object>) invoiceResponse.getBody().get("data");
     
-            if (invoiceData == null || (!"Unpaid".equals(invoiceData.get("status")) && !"Partially Paid".equals(invoiceData.get("status")))) {
+            if (invoiceData == null || (!"Unpaid".equals(invoiceData.get("status")) 
+                && !"Partially Paid".equals(invoiceData.get("status"))) && !"Overdue".equals(invoiceData.get("status"))) {
                 model.addAttribute("error", "Invoice not found or not in Unpaid/Partially Paid status.");
                 return "pages/payment-form";
             }
