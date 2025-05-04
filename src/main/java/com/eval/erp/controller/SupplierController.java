@@ -283,7 +283,8 @@ public class SupplierController {
         RestTemplate restTemplate = new RestTemplate();
 
         try {
-            String fields = "[\"*\"]";
+            // Inclure per_billed et per_received dans les champs demandés
+            String fields = "[\"name\", \"supplier\", \"supplier_name\", \"status\", \"transaction_date\", \"grand_total\", \"per_billed\", \"per_received\"]";
             String filters = "[[\"supplier\", \"=\", \"" + id + "\"]]";
             String purchaseOrdersUrl = erpNextApiUrl + "/api/resource/Purchase Order?fields=" + fields + "&filters=" + filters;
 
@@ -291,6 +292,7 @@ public class SupplierController {
 
             ResponseEntity<Map> purchaseOrdersResponse = restTemplate.exchange(purchaseOrdersUrl, HttpMethod.GET, request, Map.class);
             List<Map<String, Object>> purchaseOrders = (List<Map<String, Object>>) purchaseOrdersResponse.getBody().get("data");
+
             model.addAttribute("purchaseOrders", purchaseOrders);
         } catch (HttpClientErrorException e) {
             logger.error("Erreur HTTP : {} - Réponse : {}", e.getStatusCode(), e.getResponseBodyAsString());
@@ -301,7 +303,7 @@ public class SupplierController {
         }
 
         return "pages/purchase-orders";
-    }
+}
 
 
 

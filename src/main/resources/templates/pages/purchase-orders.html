@@ -9,6 +9,25 @@
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .progress {
+            height: 10px;
+            margin-bottom: 0;
+            width: 100px; /* Largeur fixe pour toutes les barres */
+        }
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+            background-color: #28a745; /* Vert ERPNext */
+        }
+        /* Fixer la largeur des colonnes % Billed et % Received */
+        .frappe-table th.billed-col,
+        .frappe-table th.received-col,
+        .frappe-table td.billed-col,
+        .frappe-table td.received-col {
+            width: 120px; /* Largeur fixe pour les deux colonnes */
+            text-align: center; /* Centrer le contenu */
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -38,8 +57,9 @@
                             <th>Status</th>
                             <th>Transaction Date</th>
                             <th>Grand Total</th>
+                            <th class="billed-col">% Billed</th> <!-- Ajout de la classe billed-col -->
+                            <th class="received-col">% Received</th> <!-- Ajout de la classe received-col -->
                             <th>ID</th>
-                            <!-- <th>Actions</th> -->
                         </tr>
                     </thead>
                     <tbody class="list-row-container">
@@ -55,17 +75,28 @@
                             </td>
                             <td th:text="${purchaseOrder.transaction_date}"></td>
                             <td th:text="${#numbers.formatDecimal(purchaseOrder.grand_total, 0, 'COMMA', 2, 'POINT')}"></td>
-                            <td th:text="${purchaseOrder.name}"></td>
-                            <!-- <td class="actions-col">
-                                <div class="actions">
-                                    <a th:href="@{/purchase-order-details/{id}(id=${purchaseOrder.name})}" class="btn btn-sm btn-link">
-                                        View Details
-                                    </a>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar"
+                                         th:style="'width: ' + ${purchaseOrder.per_billed} + '%'"
+                                         th:attr="aria-valuenow=${purchaseOrder.per_billed}"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                    </div>
                                 </div>
-                            </td> -->
+                            </td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar"
+                                         th:style="'width: ' + ${purchaseOrder.per_received} + '%'"
+                                         th:attr="aria-valuenow=${purchaseOrder.per_received}"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:text="${purchaseOrder.name}"></td>
                         </tr>
                         <tr th:if="${purchaseOrders == null or purchaseOrders.isEmpty()}">
-                            <td colspan="6" class="no-result text-muted text-center py-4">
+                            <td colspan="7" class="no-result text-muted text-center py-4">
                                 No purchase orders found for this supplier.
                             </td>
                         </tr>
