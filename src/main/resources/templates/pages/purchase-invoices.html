@@ -9,7 +9,18 @@
     <link rel="stylesheet" th:href="@{/css/navbar.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .title-link {
+            text-decoration: none; /* Supprime le soulignement par défaut */
+            color: inherit; /* Conserve la couleur du texte par défaut (pas de couleur bleue) */
+        }
+        .title-link:hover {
+            text-decoration: underline; /* Ajoute un soulignement au survol */
+            color: inherit; /* Conserve la couleur du texte par défaut au survol */
+        }
+    </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <div th:replace="~{navbar :: navbar}"></div>
@@ -31,6 +42,7 @@
 
             <!-- List view with table -->
             <div class="frappe-list">
+                <!-- Dans purchase-invoices.html, remplacez la table existante par celle-ci -->
                 <table class="frappe-table">
                     <thead>
                         <tr class="list-row-head">
@@ -45,15 +57,19 @@
                     </thead>
                     <tbody class="list-row-container">
                         <tr class="list-row" th:each="invoice : ${invoices}">
-                            <td th:text="${invoice.title}"></td>
+                            <td>
+                                <a th:href="@{'/invoice-details/' + ${invoice.name}}"
+                                th:text="${invoice.title}"
+                                class="title-link"></a>
+                            </td>
                             <td th:text="${invoice.supplier}"></td>
                             <td>
                                 <span th:text="${invoice.status}"
-                                      th:class="${invoice.status == 'Unpaid' ? 'indicator-pill orange' : 
-                                                  invoice.status == 'Submitted' ? 'indicator-pill blue' : 
-                                                  invoice.status == 'Paid' ? 'indicator-pill green' : 
-                                                  invoice.status == 'Overdue' ? 'indicator-pill red' : 
-                                                  invoice.status == 'Unpaid' ? 'indicator-pill yellow' : 'indicator-pill gray'}">
+                                    th:class="${invoice.status == 'Unpaid' ? 'indicator-pill orange' : 
+                                                invoice.status == 'Submitted' ? 'indicator-pill blue' : 
+                                                invoice.status == 'Paid' ? 'indicator-pill green' : 
+                                                invoice.status == 'Overdue' ? 'indicator-pill red' : 
+                                                invoice.status == 'Unpaid' ? 'indicator-pill yellow' : 'indicator-pill gray'}">
                                 </span>
                             </td>
                             <td th:text="${invoice.posting_date}"></td>
@@ -63,8 +79,8 @@
                                 <div class="actions">
                                     <th:block th:if="${invoice.status != 'Paid' && invoice.status != 'Cancelled'}">
                                         <a th:href="@{/create-payment/{id}(id=${invoice.name})}" 
-                                           class="btn btn-sm btn-link"
-                                           onclick="createPayment('${invoice.name}')">
+                                        class="btn btn-sm btn-link"
+                                        onclick="createPayment('${invoice.name}')">
                                             Create Payment
                                         </a>
                                     </th:block>
@@ -80,7 +96,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>      
+                </table>
             </div>   
         </div>
 

@@ -81,6 +81,51 @@ public class PurchaseInvoiceController {
         return "pages/purchase-invoices";
     }
 
+    @GetMapping("/invoice-details/{id}")
+    public String showInvoiceDetails(@PathVariable String id, Model model) {
+        model.addAttribute("username", SecurityContextHolder.getContext().getAuthentication().getName());
+        model.addAttribute("activeMenu", "invoices");
+
+        String sid = (String) session.getAttribute("erp_sid");
+        if (sid == null) {
+            model.addAttribute("error", "ERPNext session not found. Please reconnect.");
+            return "pages/invoice-details";
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", sid);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+            // Récupérer les détails de la facture
+            String invoiceUrl = erpNextApiUrl + "/api/resource/Purchase Invoice/" + id;
+            ResponseEntity<Map> invoiceResponse = restTemplate.exchange(invoiceUrl, HttpMethod.GET, request, Map.class);
+            Map<String, Object> invoiceData = (Map<String, Object>) invoiceResponse.getBody().get("data");
+
+            if (invoiceData == null) {
+                model.addAttribute("error", "Invoice not found.");
+                return "pages/invoice-details";
+            }
+
+            // Ajouter les données de la facture au modèle
+            model.addAttribute("invoice", invoiceData);
+
+            // Récupérer les éléments de la facture (items)
+            List<Map<String, Object>> items = (List<Map<String, Object>>) invoiceData.get("items");
+            model.addAttribute("items", items != null ? items : new ArrayList<>());
+
+        } catch (HttpClientErrorException e) {
+            logger.error("HTTP error fetching invoice details: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            model.addAttribute("error", "Error fetching invoice details: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error: {}", e.getMessage());
+            model.addAttribute("error", "Unexpected error: " + e.getMessage());
+        }
+
+        return "pages/invoice-details";
+    }
+
     @GetMapping("/payment-form/{id}")
     public String showPaymentForm(@PathVariable String id, Model model) {
         model.addAttribute("username", SecurityContextHolder.getContext().getAuthentication().getName());
