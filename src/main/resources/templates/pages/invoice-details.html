@@ -71,8 +71,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <p><strong>Supplier:</strong> <span th:text="${invoice.supplier}"></span></p>
-                            <p><strong>Posting Date:</strong> <span th:text="${invoice.posting_date}"></span></p>
-                            <p><strong>Due Date:</strong> <span th:text="${invoice.due_date}"></span></p>
+                            <p><strong>Posting Date:</strong> <span th:text="${invoice.postingDate}"></span></p>
+                            <p><strong>Due Date:</strong> <span th:text="${invoice.dueDate}"></span></p>
                         </div>
                         <div class="col-md-6">
                             <p><strong>Status:</strong>
@@ -84,8 +84,8 @@
                                                   invoice.status == 'Unpaid' ? 'indicator-pill yellow' : 'indicator-pill gray'}">
                                 </span>
                             </p>
-                            <p><strong>Grand Total:</strong> <span th:text="${#numbers.formatDecimal(invoice.grand_total, 0, 'COMMA', 2, 'POINT')}"></span></p>
-                            <p><strong>Outstanding Amount:</strong> <span th:text="${#numbers.formatDecimal(invoice.outstanding_amount, 0, 'COMMA', 2, 'POINT')}"></span></p>
+                            <p><strong>Grand Total:</strong> <span th:text="${#numbers.formatDecimal(invoice.grandTotal, 0, 'COMMA', 2, 'POINT')}"></span></p>
+                            <p><strong>Outstanding Amount:</strong> <span th:text="${#numbers.formatDecimal(invoice.outstandingAmount, 0, 'COMMA', 2, 'POINT')}"></span></p>
                         </div>
                     </div>
                 </div>

@@ -43,14 +43,13 @@
                     </thead>
                     <tbody class="list-row-container">
                         <tr class="list-row" th:each="supplier : ${suppliers}">
-                            <td th:text="${supplier.supplier_name}"></td>
+                            <td th:text="${supplier.supplierName}"></td>
                             <td>
                                 <span th:text="${supplier.disabled == '1' ? 'Disabled' : 'Enabled'}"
                                       th:class="${supplier.disabled == '1' ? 'indicator-pill red' : 'indicator-pill blue'}">
                                 </span>
-                          
                             </td>
-                            <td th:text="${supplier.supplier_group}"></td>
+                            <td th:text="${supplier.supplierGroup}"></td>
                             <td th:text="${supplier.name}"></td>
                             <td class="actions-col">
                                 <div class="actions">
@@ -70,8 +69,6 @@
                         </tr>
                     </tbody>
                 </table>
-                
-
             </div>
         </div>
     </div>

@@ -13,19 +13,18 @@
         .progress {
             height: 10px;
             margin-bottom: 0;
-            width: 100px; /* Largeur fixe pour toutes les barres */
+            width: 100px;
         }
         .progress-bar {
             transition: width 0.3s ease-in-out;
-            background-color: #28a745; /* Vert ERPNext */
+            background-color: #28a745;
         }
-        /* Fixer la largeur des colonnes % Billed et % Received */
         .frappe-table th.billed-col,
         .frappe-table th.received-col,
         .frappe-table td.billed-col,
         .frappe-table td.received-col {
-            width: 120px; /* Largeur fixe pour les deux colonnes */
-            text-align: center; /* Centrer le contenu */
+            width: 120px;
+            text-align: center;
         }
     </style>
 </head>
@@ -57,14 +56,14 @@
                             <th>Status</th>
                             <th>Transaction Date</th>
                             <th>Grand Total</th>
-                            <th class="billed-col">% Billed</th> <!-- Ajout de la classe billed-col -->
-                            <th class="received-col">% Received</th> <!-- Ajout de la classe received-col -->
+                            <th class="billed-col">% Billed</th>
+                            <th class="received-col">% Received</th>
                             <th>ID</th>
                         </tr>
                     </thead>
                     <tbody class="list-row-container">
                         <tr class="list-row" th:each="purchaseOrder : ${purchaseOrders}">
-                            <td th:text="${purchaseOrder.supplier_name}"></td>
+                            <td th:text="${purchaseOrder.supplierName}"></td>
                             <td>
                                 <span th:text="${purchaseOrder.status}"
                                       th:class="${purchaseOrder.status == 'Draft' ? 'indicator-pill orange' : 
@@ -73,22 +72,22 @@
                                                   purchaseOrder.status == 'Cancelled' ? 'indicator-pill red' : 'indicator-pill gray'}">
                                 </span>
                             </td>
-                            <td th:text="${purchaseOrder.transaction_date}"></td>
-                            <td th:text="${#numbers.formatDecimal(purchaseOrder.grand_total, 0, 'COMMA', 2, 'POINT')}"></td>
-                            <td>
+                            <td th:text="${purchaseOrder.transactionDate}"></td>
+                            <td th:text="${#numbers.formatDecimal(purchaseOrder.grandTotal, 0, 'COMMA', 2, 'POINT')}"></td>
+                            <td class="billed-col">
                                 <div class="progress">
                                     <div class="progress-bar" role="progressbar"
-                                         th:style="'width: ' + ${purchaseOrder.per_billed} + '%'"
-                                         th:attr="aria-valuenow=${purchaseOrder.per_billed}"
+                                         th:style="'width: ' + ${purchaseOrder.perBilled} + '%'"
+                                         th:attr="aria-valuenow=${purchaseOrder.perBilled}"
                                          aria-valuemin="0" aria-valuemax="100">
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td class="received-col">
                                 <div class="progress">
                                     <div class="progress-bar" role="progressbar"
-                                         th:style="'width: ' + ${purchaseOrder.per_received} + '%'"
-                                         th:attr="aria-valuenow=${purchaseOrder.per_received}"
+                                         th:style="'width: ' + ${purchaseOrder.perReceived} + '%'"
+                                         th:attr="aria-valuenow=${purchaseOrder.perReceived}"
                                          aria-valuemin="0" aria-valuemax="100">
                                     </div>
                                 </div>

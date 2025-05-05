@@ -10,10 +10,7 @@
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        .form-section {
-            margin-bottom: 1.5rem;
-        }
-
+        .form-section { margin-bottom: 1.5rem; }
         .section-head {
             font-size: 0.875rem;
             font-weight: 600;
@@ -23,13 +20,11 @@
             color: var(--gray-700);
             text-transform: uppercase;
         }
-
         .field-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1rem;
         }
-
         .frappe-form {
             background-color: #fff;
             border-radius: 8px;
@@ -38,7 +33,6 @@
             margin-bottom: 1.5rem;
             border: 1px solid var(--gray-200);
         }
-
         .form-label {
             font-weight: 500;
             margin-bottom: 0.375rem;
@@ -47,7 +41,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .form-control, .form-select {
             border: 1px solid var(--gray-300);
             border-radius: 4px;
@@ -56,16 +49,11 @@
             font-size: 0.875rem;
             color: var(--gray-800);
         }
-
         .form-control:focus, .form-select:focus {
             border-color: var(--blue-600);
             box-shadow: 0 0 0 2px var(--blue-100);
         }
-
-        .form-control:read-only {
-            background-color: var(--gray-100);
-        }
-
+        .form-control:read-only { background-color: var(--gray-100); }
         .action-bar {
             background-color: #fff;
             padding: 1rem;
@@ -78,7 +66,6 @@
             bottom: 0;
             z-index: 10;
         }
-
         .alert {
             border-radius: 6px;
             padding: 0.75rem 1rem;
@@ -86,29 +73,15 @@
             font-size: 0.875rem;
             border: none;
         }
-
-        .alert-info {
-            background-color: var(--blue-50);
-            color: var(--blue-800);
-        }
-
-        .alert-danger {
-            background-color: #ffeaea;
-            color: #e53935;
-        }
-
-        .alert-success {
-            background-color: #e6f4ea;
-            color: #2e7d32;
-        }
-
+        .alert-info { background-color: var(--blue-50); color: var(--blue-800); }
+        .alert-danger { background-color: #ffeaea; color: #e53935; }
+        .alert-success { background-color: #e6f4ea; color: #2e7d32; }
         .input-group-text {
             background-color: var(--gray-100);
             border: 1px solid var(--gray-300);
             color: var(--gray-600);
             font-size: 0.875rem;
         }
-
         .btn {
             font-weight: 500;
             font-size: 0.875rem;
@@ -116,44 +89,33 @@
             border-radius: 6px;
             transition: all 0.2s;
         }
-
         .btn-primary {
             background-color: var(--blue-600);
             border-color: var(--blue-600);
             color: white;
         }
-
         .btn-primary:hover {
             background-color: var(--blue-700);
             border-color: var(--blue-700);
         }
-
         .btn-secondary {
             background-color: var(--gray-100);
             border-color: var(--gray-200);
             color: var(--gray-700);
         }
-
         .btn-secondary:hover {
             background-color: var(--gray-200);
             border-color: var(--gray-300);
             color: var(--gray-800);
         }
-
-        .references-table {
-            margin-top: 1rem;
-        }
-
+        .references-table { margin-top: 1rem; }
         .references-table th {
             font-size: 0.75rem;
             text-transform: uppercase;
             color: var(--gray-600);
             font-weight: 600;
         }
-
-        .references-table td {
-            vertical-align: middle;
-        }
+        .references-table td { vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -205,10 +167,10 @@
                                        name="party" th:value="${supplier}" readonly>
                             </div>
                             <div class="mb-3">
-                                <label for="transaction_date" class="form-label">Transaction Date</label>
+                                <label for="posting_date" class="form-label">Posting Date</label>
                                 <div class="input-group">
-                                    <input type="date" class="form-control" id="transaction_date" 
-                                           name="transaction_date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
+                                    <input type="date" class="form-control" id="posting_date" 
+                                           name="posting_date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
                                     <span class="input-group-text">
                                         <i class="fa-regular fa-calendar"></i>
                                     </span>
@@ -254,6 +216,14 @@
                                 </div>
                             </div>
                             <div class="mb-3">
+                                <label for="received_amount" class="form-label">Received Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" class="form-control" id="received_amount" 
+                                        name="received_amount" th:value="${outstanding_amount}" readonly>
+                                </div>
+                            </div>
+                            <div class="mb-3">
                                 <label for="payment_date" class="form-label">Payment Date</label>
                                 <div class="input-group">
                                     <input type="date" class="form-control" id="payment_date" 
@@ -267,7 +237,6 @@
                     </div>
                 </div>
 
-
                 <!-- References Section -->
                 <div class="form-section">
                     <div class="section-head">References</div>
@@ -279,14 +248,26 @@
                                     <th>Reference Name</th>
                                     <th>Due Date</th>
                                     <th>Outstanding Amount</th>
+                                    <th>Allocated Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Purchase Invoice</td>
-                                    <td th:text="${invoiceId}"></td>
+                                    <td>
+                                        <input type="hidden" name="references[0].reference_doctype" value="Purchase Invoice">
+                                        Purchase Invoice
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="references[0].reference_name" th:value="${invoiceId}">
+                                        <span th:text="${invoiceId}"></span>
+                                    </td>
                                     <td th:text="${due_date ?: 'N/A'}"></td>
                                     <td th:text="${#numbers.formatDecimal(outstanding_amount, 0, 'COMMA', 2, 'POINT')}"></td>
+                                    <td>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               name="references[0].allocated_amount" id="allocated_amount" 
+                                               th:value="${outstanding_amount}" min="0" th:attr="max=${outstanding_amount}">
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -331,15 +312,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Synchronize paid_amount with received_amount and allocated_amount
         document.getElementById('paid_amount').addEventListener('input', function() {
-            document.getElementById('allocated_amount').value = this.value;
+            const paidAmount = this.value;
+            document.getElementById('received_amount').value = paidAmount;
+            document.getElementById('allocated_amount').value = paidAmount;
         });
-    
+
         function validateForm() {
             const paidAmount = parseFloat(document.getElementById('paid_amount').value) || 0;
             const outstandingAmount = parseFloat(document.getElementById('outstanding_amount').value) || 0;
             const modeOfPayment = document.getElementById('mode_of_payment').value;
-    
+
             if (!modeOfPayment) {
                 alert('Payment Mode is required.');
                 return false;

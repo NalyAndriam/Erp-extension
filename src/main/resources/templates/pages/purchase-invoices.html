@@ -11,16 +11,34 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .title-link {
-            text-decoration: none; /* Supprime le soulignement par défaut */
-            color: inherit; /* Conserve la couleur du texte par défaut (pas de couleur bleue) */
+            text-decoration: none;
+            color: inherit;
         }
         .title-link:hover {
-            text-decoration: underline; /* Ajoute un soulignement au survol */
-            color: inherit; /* Conserve la couleur du texte par défaut au survol */
+            text-decoration: underline;
+            color: inherit;
+        }
+
+
+
+        .alert {
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+        }
+        .alert-danger {
+            background-color: #ffeaea;
+            color: #e53935;
+        }
+        .actions-col {
+            text-align: right;
+        }
+        .no-result {
+            font-size: 0.875rem;
+            color: #6c757d;
         }
     </style>
 </head>
-
 <body>
     <!-- Navbar -->
     <div th:replace="~{navbar :: navbar}"></div>
@@ -37,69 +55,69 @@
 
             <!-- Error message -->
             <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-2"></i>
                 <span th:text="${error}"></span>
             </div>
 
             <!-- List view with table -->
             <div class="frappe-list">
-                <!-- Dans purchase-invoices.html, remplacez la table existante par celle-ci -->
                 <table class="frappe-table">
                     <thead>
                         <tr class="list-row-head">
-                            <th>Title</th>
+                            <th>Name</th>
                             <th>Supplier</th>
                             <th>Status</th>
-                            <th>Posting Date</th>
                             <th>Grand Total</th>
-                            <th>ID</th>
+                            <th>Outstanding Amount</th>
+                            <th>Posting Date</th>
+                            <th>Due Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody class="list-row-container">
                         <tr class="list-row" th:each="invoice : ${invoices}">
                             <td>
-                                <a th:href="@{'/invoice-details/' + ${invoice.name}}"
-                                th:text="${invoice.title}"
-                                class="title-link"></a>
+                                <a th:href="@{/invoice-details/{id}(id=${invoice.name})}"
+                                   th:text="${invoice.name}"
+                                   class="title-link"></a>
                             </td>
                             <td th:text="${invoice.supplier}"></td>
                             <td>
                                 <span th:text="${invoice.status}"
-                                    th:class="${invoice.status == 'Unpaid' ? 'indicator-pill orange' : 
-                                                invoice.status == 'Submitted' ? 'indicator-pill blue' : 
-                                                invoice.status == 'Paid' ? 'indicator-pill green' : 
-                                                invoice.status == 'Overdue' ? 'indicator-pill red' : 
-                                                invoice.status == 'Unpaid' ? 'indicator-pill yellow' : 'indicator-pill gray'}">
+                                      th:class="${invoice.status == 'Unpaid' ? 'indicator-pill orange' : 
+                                                  invoice.status == 'Submitted' ? 'indicator-pill blue' : 
+                                                  invoice.status == 'Paid' ? 'indicator-pill green' : 
+                                                  invoice.status == 'Overdue' ? 'indicator-pill red' : 
+                                                  invoice.status == 'Partially Paid' ? 'indicator-pill yellow' : 'indicator-pill gray'}">
                                 </span>
                             </td>
-                            <td th:text="${invoice.posting_date}"></td>
-                            <td th:text="${#numbers.formatDecimal(invoice.grand_total, 0, 'COMMA', 2, 'POINT')}"></td>
-                            <td th:text="${invoice.name}"></td>
+                            <td th:text="${#numbers.formatDecimal(invoice.grandTotal, 0, 'COMMA', 2, 'POINT')}"></td>
+                            <td th:text="${#numbers.formatDecimal(invoice.outstandingAmount, 0, 'COMMA', 2, 'POINT')}"></td>
+                            <td th:text="${invoice.postingDate}"></td>
+                            <td th:text="${invoice.dueDate}"></td>
                             <td class="actions-col">
                                 <div class="actions">
-                                    <th:block th:if="${invoice.status != 'Paid' && invoice.status != 'Cancelled'}">
-                                        <a th:href="@{/create-payment/{id}(id=${invoice.name})}" 
-                                        class="btn btn-sm btn-link"
-                                        onclick="createPayment('${invoice.name}')">
+                                    <th:block th:if="${invoice.status == 'Unpaid' or invoice.status == 'Partially Paid' or invoice.status == 'Overdue'}">
+                                        <a th:href="@{/payment-form/{id}(id=${invoice.name})}"
+                                           class="btn btn-sm btn-link">
                                             Create Payment
                                         </a>
                                     </th:block>
-                                    <th:block th:unless="${invoice.status != 'Paid' && invoice.status != 'Cancelled'}">
+                                    <th:block th:unless="${invoice.status == 'Unpaid' or invoice.status == 'Partially Paid' or invoice.status == 'Overdue'}">
                                         <span class="btn btn-sm btn-link disabled">Payment unavailable</span>
                                     </th:block>
                                 </div>
                             </td>
                         </tr>
                         <tr th:if="${invoices == null or invoices.isEmpty()}">
-                            <td colspan="7" class="no-result text-muted text-center py-4">
+                            <td colspan="8" class="no-result text-muted text-center py-4">
                                 No purchase invoices found.
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>   
+            </div>
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/js/bootstrap.bundle.min.js"></script>
