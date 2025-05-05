@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERPNext - Invoice Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .frappe-card {
+            border: 1px solid #d1d8dd;
+            border-radius: 4px;
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+        .frappe-card h5 {
+            margin-bottom: 15px;
+            color: #36414c;
+        }
+        .frappe-table th, .frappe-table td {
+            padding: 10px;
+            vertical-align: middle;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .frappe-card { border: none; }
+        }
+        @page {
+            size: A4 portrait;
+            margin: 20mm;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{navbar :: navbar}" class="no-print"></div>
+
+    <!-- Sidebar -->
+    <div th:replace="~{sidebar :: sidebar}" class="no-print"></div>
+
+    <!-- Main content -->
+    <div class="main-content" id="pdf-content">
+        <div class="container-fluid mt-4">
+            <div class="page-head">
+                <h1 class="page-title">Purchase Invoice: <em><span th:text="${invoice.name}"></span></em></h1>
+                <div class="no-print">
+                    <button class="btn btn-primary" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Export to PDF
+                    </button>
+                    <a th:href="@{/purchase-invoices}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Invoices
+                    </a>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Invoice Details -->
+            <div th:if="${invoice != null}">
+                <div class="frappe-card">
+                    <h5>Invoice Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Supplier:</strong> <span th:text="${invoice.supplier}"></span></p>
+                            <p><strong>Posting Date:</strong> <span th:text="${invoice.posting_date}"></span></p>
+                            <p><strong>Due Date:</strong> <span th:text="${invoice.due_date}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong>
+                                <span th:text="${invoice.status}"
+                                      th:class="${invoice.status == 'Unpaid' ? 'indicator-pill orange' : 
+                                                  invoice.status == 'Submitted' ? 'indicator-pill blue' : 
+                                                  invoice.status == 'Paid' ? 'indicator-pill green' : 
+                                                  invoice.status == 'Overdue' ? 'indicator-pill red' : 
+                                                  invoice.status == 'Unpaid' ? 'indicator-pill yellow' : 'indicator-pill gray'}">
+                                </span>
+                            </p>
+                            <p><strong>Grand Total:</strong> <span th:text="${#numbers.formatDecimal(invoice.grand_total, 0, 'COMMA', 2, 'POINT')}"></span></p>
+                            <p><strong>Outstanding Amount:</strong> <span th:text="${#numbers.formatDecimal(invoice.outstanding_amount, 0, 'COMMA', 2, 'POINT')}"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="frappe-card">
+                    <h5>Items</h5>
+                    <table class="frappe-table table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${items}">
+                                <td th:text="${item.item_code}"></td>
+                                <td th:text="${item.item_name}"></td>
+                                <td th:text="${item.qty}"></td>
+                                <td th:text="${#numbers.formatDecimal(item.rate, 0, 'COMMA', 2, 'POINT')}"></td>
+                                <td th:text="${#numbers.formatDecimal(item.amount, 0, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr th:if="${items == null or items.isEmpty()}">
+                                <td colspan="5" class="text-muted text-center py-4">
+                                    No items found for this invoice.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle sidebar on mobile
+        document.querySelector('.navbar-toggler').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const invoiceElement = document.getElementById('pdf-content');
+
+            // Masquer temporairement les éléments avec la classe no-print
+            const noPrintElements = document.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => el.style.display = 'none');
+
+            try {
+                // Convertir HTML en canvas
+                const canvas = await html2canvas(invoiceElement, {
+                    scale: 2, // Améliore la qualité
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 10; // Marge en mm
+                const imgWidth = pageWidth - 2 * margin;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+
+                let heightLeft = imgHeight;
+                let position = margin;
+
+                // Ajouter l'image au PDF
+                pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                heightLeft -= (pageHeight - 2 * margin);
+
+                // Gérer les pages supplémentaires si le contenu est trop long
+                while (heightLeft > 0) {
+                    pdf.addPage();
+                    position = margin - heightLeft;
+                    pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+                    heightLeft -= (pageHeight - 2 * margin);
+                }
+
+                // Télécharger le PDF avec un nom dynamique
+                const invoiceName = document.querySelector('.page-title em').textContent || 'invoice';
+                pdf.save(`invoice_${invoiceName}.pdf`);
+            } catch (error) {
+                console.error('Erreur lors de la génération du PDF :', error);
+                alert('Une erreur est survenue lors de la génération du PDF.');
+            } finally {
+                // Restaurer l'affichage des éléments no-print
+                noPrintElements.forEach(el => el.style.display = '');
+            }
+        }
+    </script>
+</body>
+</html>
