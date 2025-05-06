@@ -53,6 +53,11 @@ public class ErpNextApiService {
         return executePostRequest(url, data, sid);
     }
 
+    public ResponseEntity<Map> submitResource(String resourceType, String id, String sid) {
+        String url = erpNextApiUrl + "/api/resource/" + resourceType + "/" + id + "?run_method=submit";
+        return executePostRequest(url, null, sid); // Pas de payload nécessaire pour submit
+    }
+
     private ResponseEntity<Map> executeGetRequest(String url, String sid) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

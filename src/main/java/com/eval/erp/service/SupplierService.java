@@ -73,12 +73,12 @@ public class SupplierService {
     public void updateQuotation(QuotationUpdateDTO formData, String sid) throws Exception {
         String name = formData.getName();
         List<QuotationUpdateDTO.ItemUpdateDTO> items = formData.getItems();
-
+    
         if (name == null || items == null) {
             logger.error("Invalid input data: name={}, items={}", name, items);
             throw new Exception("Invalid input data: name or items are null");
         }
-
+    
         // Check quotation status
         try {
             String fields = "[\"status\",\"docstatus\"]";
@@ -86,7 +86,7 @@ public class SupplierService {
             Map<String, Object> quotationStatus = (Map<String, Object>) statusResponse.getBody().get("data");
             Integer docstatus = (Integer) quotationStatus.get("docstatus");
             String status = (String) quotationStatus.get("status");
-
+    
             if (docstatus != null && docstatus == 1) {
                 logger.error("Quotation {} is submitted (docstatus=1, status={})", name, status);
                 throw new Exception("Cannot update a submitted quotation");
@@ -95,9 +95,9 @@ public class SupplierService {
             logger.error("Error checking quotation status: {}", e.getMessage());
             throw new Exception("Failed to check quotation status: " + e.getMessage(), e);
         }
-
+    
         logger.info("Processing form data: name={}, items={}", name, items);
-
+    
         // Validate and prepare items
         List<Map<String, Object>> updatedItems = new ArrayList<>();
         for (QuotationUpdateDTO.ItemUpdateDTO item : items) {
@@ -112,10 +112,10 @@ public class SupplierService {
             String baseRate = item.getBaseRate();
             String baseAmount = item.getBaseAmount();
             String warehouse = item.getWarehouse();
-
+    
             logger.info("Item data: name={}, itemName={}, itemCode={}, rate={}, qty={}, stockUom={}, uom={}, conversionFactor={}, baseRate={}, baseAmount={}, warehouse={}",
                     itemName, itemNameField, itemCode, rate, qty, stockUom, uom, conversionFactor, baseRate, baseAmount, warehouse);
-
+    
             if (itemName == null || rate == null || itemCode == null || itemNameField == null || qty == null ||
                     stockUom == null || uom == null || conversionFactor == null ||
                     baseRate == null || baseAmount == null || warehouse == null || !rate.matches("\\d+(\\.\\d{1,2})?")) {
@@ -123,7 +123,7 @@ public class SupplierService {
                         itemName, rate, itemCode, itemNameField, qty, stockUom, uom, conversionFactor, baseRate, baseAmount, warehouse);
                 throw new Exception("Invalid data for item: " + itemName);
             }
-
+    
             Map<String, Object> updatedItem = new HashMap<>();
             updatedItem.put("name", itemName);
             updatedItem.put("item_code", itemCode);
@@ -138,21 +138,26 @@ public class SupplierService {
             updatedItem.put("warehouse", warehouse);
             updatedItems.add(updatedItem);
         }
-
+    
         // Prepare payload and update
         Map<String, Object> payload = new HashMap<>();
         payload.put("items", updatedItems);
         logger.info("Payload sent to ERPNext: {}", payload);
-
+    
         try {
+            // Update the quotation
             ResponseEntity<Map> response = apiService.updateResource("Supplier Quotation", URLEncoder.encode(name, StandardCharsets.UTF_8), payload, sid);
             logger.info("API Response: {}", response.getBody());
+    
+            // Submit the quotation
+            ResponseEntity<Map> submitResponse = apiService.submitResource("Supplier Quotation", URLEncoder.encode(name, StandardCharsets.UTF_8), sid);
+            logger.info("Quotation submitted successfully: {}", submitResponse.getBody());
         } catch (HttpClientErrorException e) {
             logger.error("HTTP Error: {} - Response: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new Exception("Failed to update quotation: " + e.getMessage(), e);
+            throw new Exception("Failed to update or submit quotation: " + e.getMessage(), e);
         } catch (Exception e) {
             logger.error("Unexpected error: {}", e.getMessage(), e);
-            throw new Exception("Failed to update quotation: " + e.getMessage(), e);
+            throw new Exception("Failed to update or submit quotation: " + e.getMessage(), e);
         }
     }
 
